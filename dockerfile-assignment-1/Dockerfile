@@ -38,3 +38,33 @@
 # Node Docker Good Defaults sample project on GitHub to change this Dockerfile for 
 # better local development with more advanced topics
 # https://github.com/BretFisher/node-docker-good-defaults
+
+# I tested this with docker container run -d --name node-alpine6 --rm node:6-alpine
+# and it did pull an image to launch and remove.
+FROM node:6-alpine
+
+# Here I want to install additional functionality into alpine
+RUN apk add --update tini
+RUN mkdir -p /usr/src/app
+
+WORKDIR /usr/src/app
+
+COPY package.json package.json
+
+RUN npm install \
+  && npm cache clean --force
+
+COPY . .
+
+# It says to run on port 80 so I'm going to assume that I expose it here, but would want
+# this line at the end of the file.
+EXPOSE 3000
+
+CMD ["tini", "--", "node", "./bin/www"]
+# below is what I had come up with
+#  CMD ['/sbin/tini --node ./bin/www']
+# then build it externally with
+# docker build -t node-alpine6 .
+# docker container run -d --name node-alpine6 --rm node:6-alpine
+# publish with docker tag todd-nodealpine toddlazar/testing-node 
+# docker push toddlazar/testing-node  
